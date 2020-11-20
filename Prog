@@ -6,6 +6,7 @@ class Sudoku():
 
     def __init__(self):
         self.board = np.array([[0 for i in range(9)] for j in range(9)])
+        self.flag = 0
 
 
     def lehetseges(self,sor,oszlop,szam):       # oszlop es sor szam lesz a felulet adott negyvzetenek neve splitelve
@@ -25,19 +26,20 @@ class Sudoku():
 
     def tablaGenerator(self):
         szamok = [1,2,3,4,5,6,7,8,9]
-        for i in range(9):
-            for j in range(9):
-                if self.board[i][j] == 0:
-                    random.shuffle(szamok)
-                    for szam in szamok:
-                        if self.lehetseges(i,j,szam) == True:
-                            self.board[i,j] = szam
-                            self.tablaGenerator()
-                    return self.board
-        print(self.board)
-                    
-                    
-
+        if self.flag == 0:
+            for x in range(9):
+                for y in range(9):
+                    if self.board[x][y] == 0:
+                        random.shuffle(szamok)
+                        for szam in szamok:
+                            if self.lehetseges(x,y,szam):
+                                self.board[x][y] = szam
+                                self.tablaGenerator()
+                                self.board[x][y] = 0
+                        return self.board
+            self.flag = 1
+            print(self.board)
+            
 
 egy = Sudoku()
 egy.tablaGenerator()
