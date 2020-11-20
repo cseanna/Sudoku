@@ -1,0 +1,39 @@
+import numpy as np
+import shuffle from random
+
+
+class Sudoku():
+
+
+
+    def __init__(self):
+        self.__board = [[0 for i in range(9)] for j in range(9)]
+
+
+    def lehetseges(self,sor,oszlop,szam):
+        for i in range(9):
+            if self.__board[sor][i] == szam:
+                return False
+        for j in range(9):
+            if self.__board[j][oszlop] == szam:
+                return False
+        kezdosor = (sor//3)*3
+        kezdooszlop = (oszlop//3)*3
+        for i in range(3):
+            for j in range(3):
+                if self.__board[kezdosor+i][kezdooszlop+j] == szam:
+                    return False
+        return True
+
+    def tablaGenerator(self):
+
+        szamok = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+        for i in range(81):
+            s = i//9
+            o = i%9
+            if self.__board[s,o] == 0:
+                shuffle(szamok)
+                for szam in szamok:
+                    if self.lehetseges(s,o,szam) == True:
+                        self.__board[s,o] = szam
