@@ -1,45 +1,76 @@
 import numpy as np
 import random
+import copy
 
 
 class Sudoku():
 
     def __init__(self):
-        self.board = np.array([[0 for i in range(9)] for j in range(9)])
+        self.cluenumber = 0
         self.flag = 0
+        self.counter = 81
+        self.nemnullahely = []
+        self.alaptabla = np.array([[0 for i in range(9)] for j in range(9)])
+        self.board = self.tablaGenerator()
 
 
-    def lehetseges(self,sor,oszlop,szam):       # oszlop es sor szam lesz a felulet adott negyvzetenek neve splitelve
+    def lehetseges(self, sor, oszlop, szam):
+
         for i in range(9):
-            if self.board[sor][i] == szam:
+            if self.alaptabla[sor][i] == szam:
                 return False
         for j in range(9):
-            if self.board[j][oszlop] == szam:
+            if self.alaptabla[j][oszlop] == szam:
                 return False
         kezdosor = (sor//3)*3
         kezdooszlop = (oszlop//3)*3
         for i in range(3):
             for j in range(3):
-                if self.board[kezdosor+i][kezdooszlop+j] == szam:
+                if self.alaptabla[kezdosor+i][kezdooszlop+j] == szam:
                     return False
         return True
 
     def tablaGenerator(self):
+
         szamok = [1,2,3,4,5,6,7,8,9]
         if self.flag == 0:
             for x in range(9):
                 for y in range(9):
-                    if self.board[x][y] == 0:
+                    if self.alaptabla[x][y] == 0:
                         random.shuffle(szamok)
                         for szam in szamok:
                             if self.lehetseges(x,y,szam):
-                                self.board[x][y] = szam
+                                self.alaptabla[x][y] = szam
                                 self.tablaGenerator()
-                                self.board[x][y] = 0
-                        return self.board
+                                self.alaptabla[x][y] = 0
+                        return self.alaptabla
             self.flag = 1
-            print(self.board)
+            print(self.alaptabla)
+
+
+
+    def hanyNemNulla(self):
+
+        for i in range(9):
+            for j in range(9):
+                if self.board[i][j] == 0:
+                    self.counter -= 1
+        return self.counter
+
+    def nemnullaHely(self):
+
+        for i in range(9):
+            for j in range(9):
+                if self.board[i][j] != 0:
+                    self.nemnullahely.append([i,j])
+
+    def nehezNullazo(self):
+
+        clue = self.hanyNemNulla()
+        while clue == self.cluenumber:
+            pass
             
 
 egy = Sudoku()
 egy.tablaGenerator()
+print(egy.board)
