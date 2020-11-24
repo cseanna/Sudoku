@@ -1,6 +1,6 @@
 import numpy as np
 import random
-import copy
+import timeit
 
 
 class Sudoku:
@@ -8,12 +8,13 @@ class Sudoku:
     def __init__(self):
         self.flag = 0
         self.solutionNumber = 0
-        self.solutionList = np.array([[0 for i in range(9)] for j in range(9)])
+        self.solutionList = []
         self.foundArray = []
+        self.foundArrays = []
         self.foundFlag = 0
         self.nemnullahely = []
         self.alaptabla = np.array([[0 for i in range(9)] for j in range(9)])
-        self.board = np.array([])
+        self.board = np.array([[0 for i in range(9)] for j in range(9)])
 
     def lehetseges(self, b, sor, oszlop, szam):
         for i in range(9):
@@ -35,13 +36,13 @@ class Sudoku:
         if self.flag == 0:
             for x in range(9):
                 for y in range(9):
-                    if receivedTable[x, y] == 0:
+                    if receivedTable[x][y] == 0:
                         random.shuffle(szamok)
                         for szam in szamok:
                             if self.lehetseges(receivedTable, x, y, szam):
-                                receivedTable[x, y] = szam
+                                receivedTable[x][y] = szam
                                 self.tablaGenerator(receivedTable)
-                                receivedTable[x, y] = 0
+                                receivedTable[x][y] = 0
                         return receivedTable
             self.flag = 1
             self.board = receivedTable.copy()
@@ -52,80 +53,74 @@ class Sudoku:
         if self.flag == 0:
             for x in range(9):
                 for y in range(9):
-                    if receivedTable[x, y] == 0:
+                    if receivedTable[x][y] == 0:
                         random.shuffle(szamok)
                         for szam in szamok:
                             if self.lehetseges(receivedTable, x, y, szam):
-                                receivedTable[x, y] = szam
+                                receivedTable[x][y] = szam
                                 self.megoldo(receivedTable)
-                                receivedTable[x, y] = 0
+                                receivedTable[x][y] = 0
                         return receivedTable
             self.flag = 1
             self.board = receivedTable.copy()
 
-    # def hanyNemNulla(self):
-    #
-    #     for i in range(9):
-    #         for j in range(9):
-    #             if self.board[i][j] == 0:
-    #                 self.counter -= 1
-    #     return self.counter
-
     def nemnullaHely(self):
         for i in range(9):
             for j in range(9):
-                if self.board[i, j] != 0:
+                if self.board[i][j] != 0:
                     self.nemnullahely.append([i, j])
-        print(self.nemnullahely)
 
     def feladvany(self):
         self.flag = 0
-        while len(self.nemnullahely) != 67:
-            random.shuffle(self.nemnullahely)
-            ok = self.nemnullahely[0]
-            sor, oszlop = ok[0], ok[1]
+        while len(self.nemnullahely) != 28:
+            ok = random.choice(self.nemnullahely)
+            sor = ok[0]
+            oszlop = ok[1]
             self.board[sor][oszlop] = 0
-            if self.lehetseges(self.board, sor, oszlop, self.alaptabla[sor][oszlop]):
-                self.solutionNumber = 0
-                self.solutionList = []
-                self.moreThanOneSolution(self.board) ## keres egy megoldast
-                while self.foundArray not in self.solutionList: ## Amig uj megoldast talalt
-                    self.solutionList.append(self.foundArray) ## Adja hozza a megoldasok listajahoz
-                    self.solutionNumber += 1 ## Egy megoldassal tobb van
-                    self.foundFlag = 0 ## Ujboli generalashoz flag = 0
-                    self.moreThanOneSolution(self.board) ## Keres egy masik megoldast majd a kesz megoldast megnezi hogy benne van-e megoldasok listaja
-                if self.solutionNumber == 1: ## Ha csak egy megoldas menjen tovabb
-                    self.nemnullahely.remove(ok)
-                else: ## Ha tobb akkor backtrack
-                    self.board[sor][oszlop] = self.alaptabla[sor][oszlop]
+            self.foundArrays = []
+            self.moreThanOneSolution(self.board.copy())
+            if len(self.foundArrays) == 1:
+                self.nemnullahely.remove(ok)
+            else:
+                self.board[sor][oszlop] = self.alaptabla[sor][oszlop]
+
         return self.board
+
 
     def moreThanOneSolution(self, receivedTable):
         szamok = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        if self.foundFlag == 0:
-            for x in range(9):
-                for y in range(9):
-                    if receivedTable[x, y] == 0:
-                        random.shuffle(szamok)
-                        for szam in szamok:
-                            if self.lehetseges(receivedTable, x, y, szam):
-                                receivedTable[x, y] = szam
-                                self.moreThanOneSolution(receivedTable)
-                                receivedTable[x, y] = 0
-                        return receivedTable
-            self.foundFlag = 1
-            self.foundArray = receivedTable.copy()
+        for x in range(9):
+            for y in range(9):
+                if receivedTable[x][y] == 0:
+                    random.shuffle(szamok)
+                    for szam in szamok:
+                        if self.lehetseges(receivedTable, x, y, szam):
+                            receivedTable[x][y] = szam
+                            self.moreThanOneSolution(receivedTable)
+                            receivedTable[x][y] = 0
+                    return receivedTable
+        if 0 not in receivedTable:
+            self.foundArrays.append(receivedTable)
 
 
 
 
-egy = Sudoku()
-egy.tablaGenerator(egy.alaptabla)
-print(egy.board, "\n****\n", egy.alaptabla)
-egy.nemnullaHely()
-egy.feladvany()
-print(egy.board, "\n****\n", egy.alaptabla)
-egy.flag = 0
-egy.megoldo(egy.board)
-print(egy.board, "\n****\n", egy.alaptabla)
-print(egy.board == egy.alaptabla)
+
+for i in range(100):
+    start = timeit.default_timer()
+
+    egy = Sudoku()
+    egy.tablaGenerator(egy.alaptabla)
+    egy.nemnullaHely()
+    egy.feladvany()
+    egy.flag = 0
+    egy.feladvany()
+    generalt = egy.board
+    egy.megoldo(egy.board)
+    print(egy.board == egy.alaptabla)
+    print(generalt)
+    
+    stop = timeit.default_timer()
+    f = open("futasido.txt", 'a')
+    f.write(f'28 Clues: {str(stop-start)}\n')
+    f.close()
