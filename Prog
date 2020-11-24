@@ -3,74 +3,129 @@ import random
 import copy
 
 
-class Sudoku():
+class Sudoku:
 
     def __init__(self):
-        self.cluenumber = 0
         self.flag = 0
-        self.counter = 81
+        self.solutionNumber = 0
+        self.solutionList = np.array([[0 for i in range(9)] for j in range(9)])
+        self.foundArray = []
+        self.foundFlag = 0
         self.nemnullahely = []
         self.alaptabla = np.array([[0 for i in range(9)] for j in range(9)])
-        self.board = self.tablaGenerator()
+        self.board = np.array([])
 
-
-    def lehetseges(self, sor, oszlop, szam):
-
+    def lehetseges(self, b, sor, oszlop, szam):
         for i in range(9):
-            if self.alaptabla[sor][i] == szam:
+            if b[sor, i] == szam:
                 return False
         for j in range(9):
-            if self.alaptabla[j][oszlop] == szam:
+            if b[j, oszlop] == szam:
                 return False
-        kezdosor = (sor//3)*3
-        kezdooszlop = (oszlop//3)*3
+        kezdosor = (sor // 3) * 3
+        kezdooszlop = (oszlop // 3) * 3
         for i in range(3):
             for j in range(3):
-                if self.alaptabla[kezdosor+i][kezdooszlop+j] == szam:
+                if b[(kezdosor + i),(kezdooszlop + j)] == szam:
                     return False
         return True
 
-    def tablaGenerator(self):
-
-        szamok = [1,2,3,4,5,6,7,8,9]
+    def tablaGenerator(self, receivedTable):
+        szamok = [1, 2, 3, 4, 5, 6, 7, 8, 9]
         if self.flag == 0:
             for x in range(9):
                 for y in range(9):
-                    if self.alaptabla[x][y] == 0:
+                    if receivedTable[x, y] == 0:
                         random.shuffle(szamok)
                         for szam in szamok:
-                            if self.lehetseges(x,y,szam):
-                                self.alaptabla[x][y] = szam
-                                self.tablaGenerator()
-                                self.alaptabla[x][y] = 0
-                        return self.alaptabla
+                            if self.lehetseges(receivedTable, x, y, szam):
+                                receivedTable[x, y] = szam
+                                self.tablaGenerator(receivedTable)
+                                receivedTable[x, y] = 0
+                        return receivedTable
             self.flag = 1
-            print(self.alaptabla)
+            self.board = receivedTable.copy()
+            self.alaptabla = receivedTable.copy()
 
+    def megoldo(self, receivedTable):
+        szamok = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        if self.flag == 0:
+            for x in range(9):
+                for y in range(9):
+                    if receivedTable[x, y] == 0:
+                        random.shuffle(szamok)
+                        for szam in szamok:
+                            if self.lehetseges(receivedTable, x, y, szam):
+                                receivedTable[x, y] = szam
+                                self.megoldo(receivedTable)
+                                receivedTable[x, y] = 0
+                        return receivedTable
+            self.flag = 1
+            self.board = receivedTable.copy()
 
-
-    def hanyNemNulla(self):
-
-        for i in range(9):
-            for j in range(9):
-                if self.board[i][j] == 0:
-                    self.counter -= 1
-        return self.counter
+    # def hanyNemNulla(self):
+    #
+    #     for i in range(9):
+    #         for j in range(9):
+    #             if self.board[i][j] == 0:
+    #                 self.counter -= 1
+    #     return self.counter
 
     def nemnullaHely(self):
-
         for i in range(9):
             for j in range(9):
-                if self.board[i][j] != 0:
-                    self.nemnullahely.append([i,j])
+                if self.board[i, j] != 0:
+                    self.nemnullahely.append([i, j])
+        print(self.nemnullahely)
 
-    def nehezNullazo(self):
+    def feladvany(self):
+        self.flag = 0
+        while len(self.nemnullahely) != 67:
+            random.shuffle(self.nemnullahely)
+            ok = self.nemnullahely[0]
+            sor, oszlop = ok[0], ok[1]
+            self.board[sor][oszlop] = 0
+            if self.lehetseges(self.board, sor, oszlop, self.alaptabla[sor][oszlop]):
+                self.solutionNumber = 0
+                self.solutionList = []
+                self.moreThanOneSolution(self.board) ## keres egy megoldast
+                while self.foundArray not in self.solutionList: ## Amig uj megoldast talalt
+                    self.solutionList.append(self.foundArray) ## Adja hozza a megoldasok listajahoz
+                    self.solutionNumber += 1 ## Egy megoldassal tobb van
+                    self.foundFlag = 0 ## Ujboli generalashoz flag = 0
+                    self.moreThanOneSolution(self.board) ## Keres egy masik megoldast majd a kesz megoldast megnezi hogy benne van-e megoldasok listaja
+                if self.solutionNumber == 1: ## Ha csak egy megoldas menjen tovabb
+                    self.nemnullahely.remove(ok)
+                else: ## Ha tobb akkor backtrack
+                    self.board[sor][oszlop] = self.alaptabla[sor][oszlop]
+        return self.board
 
-        clue = self.hanyNemNulla()
-        while clue == self.cluenumber:
-            pass
-            
+    def moreThanOneSolution(self, receivedTable):
+        szamok = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        if self.foundFlag == 0:
+            for x in range(9):
+                for y in range(9):
+                    if receivedTable[x, y] == 0:
+                        random.shuffle(szamok)
+                        for szam in szamok:
+                            if self.lehetseges(receivedTable, x, y, szam):
+                                receivedTable[x, y] = szam
+                                self.moreThanOneSolution(receivedTable)
+                                receivedTable[x, y] = 0
+                        return receivedTable
+            self.foundFlag = 1
+            self.foundArray = receivedTable.copy()
+
+
+
 
 egy = Sudoku()
-egy.tablaGenerator()
-print(egy.board)
+egy.tablaGenerator(egy.alaptabla)
+print(egy.board, "\n****\n", egy.alaptabla)
+egy.nemnullaHely()
+egy.feladvany()
+print(egy.board, "\n****\n", egy.alaptabla)
+egy.flag = 0
+egy.megoldo(egy.board)
+print(egy.board, "\n****\n", egy.alaptabla)
+print(egy.board == egy.alaptabla)
