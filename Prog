@@ -1,17 +1,12 @@
 import numpy as np
 import random
-import timeit
 
 
 class Sudoku:
 
     def __init__(self):
         self.flag = 0
-        self.solutionNumber = 0
-        self.solutionList = []
-        self.foundArray = []
         self.foundArrays = []
-        self.foundFlag = 0
         self.nemnullahely = []
         self.alaptabla = np.array([[0 for i in range(9)] for j in range(9)])
         self.board = np.array([[0 for i in range(9)] for j in range(9)])
@@ -27,7 +22,7 @@ class Sudoku:
         kezdooszlop = (oszlop // 3) * 3
         for i in range(3):
             for j in range(3):
-                if b[(kezdosor + i),(kezdooszlop + j)] == szam:
+                if b[(kezdosor + i), (kezdooszlop + j)] == szam:
                     return False
         return True
 
@@ -72,7 +67,7 @@ class Sudoku:
 
     def feladvany(self):
         self.flag = 0
-        while len(self.nemnullahely) != 28:
+        while len(self.nemnullahely) != 30:
             ok = random.choice(self.nemnullahely)
             sor = ok[0]
             oszlop = ok[1]
@@ -85,7 +80,6 @@ class Sudoku:
                 self.board[sor][oszlop] = self.alaptabla[sor][oszlop]
 
         return self.board
-
 
     def moreThanOneSolution(self, receivedTable):
         szamok = [1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -102,25 +96,13 @@ class Sudoku:
         if 0 not in receivedTable:
             self.foundArrays.append(receivedTable)
 
+    def szekv(self):
+        self.tablaGenerator(self.alaptabla)
+        self.nemnullaHely()
+        self.feladvany()
+        return self.board
 
 
-
-
-for i in range(100):
-    start = timeit.default_timer()
-
-    egy = Sudoku()
-    egy.tablaGenerator(egy.alaptabla)
-    egy.nemnullaHely()
-    egy.feladvany()
-    egy.flag = 0
-    egy.feladvany()
-    generalt = egy.board
-    egy.megoldo(egy.board)
-    print(egy.board == egy.alaptabla)
-    print(generalt)
-    
-    stop = timeit.default_timer()
-    f = open("futasido.txt", 'a')
-    f.write(f'28 Clues: {str(stop-start)}\n')
-    f.close()
+egy = Sudoku()
+egy.szekv()
+print(egy.board)
